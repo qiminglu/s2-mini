@@ -5,6 +5,7 @@
 #include <map>
 #include <list>
 #include <vector>
+#include <deque>
 
 class Lattice;
 class Lattice_element;
@@ -58,7 +59,7 @@ private:
 
     Lattice * lattice_ptr;
 
-    std::vector<Lattice_element_slice> slices;
+    std::deque<Lattice_element_slice> slices;
 
 public:
     /// Construct a Lattice_element with an empty name and type.
@@ -79,11 +80,14 @@ public:
     void clear_slices() 
     { slices.clear(); }
 
-    Lattice_element_slice & add_slice() 
-    { slices.emplace_back(*this); return slices.back(); }
+    std::deque<Lattice_element_slice> & get_slices()
+    { return slices; }
 
-    Lattice_element_slice & add_slice(double left, double right)
-    { slices.emplace_back(*this, left, right); return slices.back(); }
+    Lattice_element_slice * add_slice() 
+    { slices.emplace_back(*this); return &slices.back(); }
+
+    Lattice_element_slice * add_slice(double left, double right)
+    { slices.emplace_back(*this, left, right); return &slices.back(); }
 
     /// Set the value of the named double attribute
     /// @param name attribute name

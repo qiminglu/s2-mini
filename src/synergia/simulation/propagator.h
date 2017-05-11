@@ -42,12 +42,9 @@ private:
 
 public:
 
-    Propagator(Stepper & stepper)
-      : stepper(stepper)
+    Propagator(Stepper & s)
+      : stepper(s)
       , omp_threads(1)
-    { }
-
-    ~Propagator()
     { }
 
     Stepper & get_stepper() 

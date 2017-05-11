@@ -33,8 +33,10 @@ Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator & col_op,
             Step step(0.0);
 
             auto ind_op_ptr = std::make_shared<Independent_operator>("step");
+            step.append(ind_op_ptr, 1.0);
+
             auto slice = le.add_slice();
-            dynamic_cast<Independent_operator *>(step.append(ind_op_ptr, 1.0)) -> append_slice(slice);
+            ind_op_ptr->append_slice(slice);
 
             steps.push_back(step);
         } 
@@ -53,9 +55,10 @@ Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator & col_op,
 
                 //1st Half
                 auto ind_op_ptr = std::make_shared<Independent_operator>("first_half");
-                auto ind_op_first_half = dynamic_cast<Independent_operator *>(step.append(ind_op_ptr, 0.5));
+                step.append(ind_op_ptr, 0.5);
+
                 auto slice_1st_half = le.add_slice(left, middle);
-                ind_op_first_half->append_slice(slice_1st_half);
+                ind_op_ptr->append_slice(slice_1st_half);
 
                 //Collective Effects
                 //step.append(col_op, 1.0);
@@ -71,13 +74,13 @@ Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator & col_op,
 
                 //2nd Half
                 ind_op_ptr = std::make_shared<Independent_operator>("second_half");
-                auto ind_op_second_half = dynamic_cast<Independent_operator *>(step.append(ind_op_ptr, 0.5));
+                step.append(ind_op_ptr, 0.5);
+
                 auto slice_2nd_half = le.add_slice(middle, right);
-                ind_op_second_half->append_slice(slice_2nd_half);
+                ind_op_ptr->append_slice(slice_2nd_half);
 
                 // push to steps
                 steps.push_back(step);
-
             }
         }
     }

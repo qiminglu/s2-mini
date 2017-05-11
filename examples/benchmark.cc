@@ -6,13 +6,14 @@
 #include "synergia/simulation/lattice_simulator.h"
 #include "synergia/simulation/propagator.h"
 #include "synergia/bunch/bunch.h"
+#include "synergia/foundation/physical_constants.h"
 
 
 // We put the actual code in a separate function so that shared_ptr's can
 // be cleanup up properly before we call MPI_Finalize.
 void run()
 {
-    std::vector<int > grid_shape = { 16, 16, 16 };
+    std::vector<int > grid_shape = { 32, 32, 32 };
 
     const int part_per_cell = 10;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
@@ -20,11 +21,11 @@ void run()
     const int seed = 4;
     const double num_real_particles = 1e13;
 
-    const int num_steps = 8;
+    const int num_steps = 2;
     const int num_turns = 4;
     const int map_order = 2;
 
-    int verbosity = 6;
+    int verbosity = 2;
 
 #if 0
     Lattice_sptr lattice_sptr(new Lattice());
@@ -33,8 +34,19 @@ void run()
 
     Commxx_sptr comm = std::make_shared<Commxx>();
 
+    // reference particle
+    Reference_particle ref_part(1, pconstants::mp, 7.0);
+
+    // lattice elements
+    Lattice_element e_drift("drift", "d1");
+    e_drift.set_double_attribute("l", 1.0);
+
+    // the lattice
     Lattice lattice;
-    Bunch bunch(lattice.get_reference_particle(), num_macro_particles, num_real_particles, comm);
+    lattice.set_reference_particle(ref_part);
+    lattice.append_element(e_drift);
+
+    Bunch bunch(ref_part, num_macro_particles, num_real_particles, comm);
 
 #if 0
     Random_distribution distribution(seed, *comm_sptr);

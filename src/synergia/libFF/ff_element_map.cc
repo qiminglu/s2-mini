@@ -1,8 +1,10 @@
+#include "ff_drift.h"
 #include "ff_element_map.h"
+#include <memory>
 
 FF_element_map::FF_element_map()
 {
-
+    element_map["drift"] = std::make_shared<FF_drift>();
 }
 
 bool FF_element_map::has_element_type(std::string const& type) const
@@ -28,7 +30,6 @@ FF_element_sptr FF_element_map::get_element_type(std::string const& type) const
 
 // jfa "the_big_giant_global_ff_element_map" is a temporary workaround for the
 // problem of making the FF_element_map available to FF_propagate_operation.
-#include "ff_drift.h"
 #if 0
 #include "ff_sbend.h"
 #include "ff_rbend.h"
@@ -46,10 +47,11 @@ FF_element_sptr FF_element_map::get_element_type(std::string const& type) const
 #endif
 
 FF_element_map the_big_giant_global_ff_element_map;
+
 void construct_big_giant_global_ff_element_map()
 {
-    the_big_giant_global_ff_element_map.set_element_type("drift",      FF_drift_sptr(new FF_drift()));
 #if 0
+    the_big_giant_global_ff_element_map.set_element_type("drift",      FF_drift_sptr(new FF_drift()));
     the_big_giant_global_ff_element_map.set_element_type("sbend",      FF_sbend_sptr(new FF_sbend()));
     the_big_giant_global_ff_element_map.set_element_type("rbend",      FF_rbend_sptr(new FF_rbend()));
     the_big_giant_global_ff_element_map.set_element_type("rfcavity",   FF_rfcavity_sptr(new FF_rfcavity()));

@@ -80,8 +80,8 @@ public:
     void update_operations(Reference_particle const& reference_particle);
     bool need_update(Reference_particle const& reference_particle, int verbosity, Logger & logger);
 
-    void append_slice(Lattice_element_slice const & slice)
-    { slices.push_back(&slice); have_operations = false; }
+    void append_slice(Lattice_element_slice const * slice)
+    { slices.push_back(slice); have_operations = false; }
 
     std::vector<Lattice_element_slice const *> const & get_slices() const { return slices; }
 

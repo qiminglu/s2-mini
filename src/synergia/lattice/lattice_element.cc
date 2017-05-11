@@ -73,8 +73,8 @@ Lattice_element::Lattice_element()
 }
 
 Lattice_element::Lattice_element(std::string const& type, std::string const& name)
-: type("")
-, name("")
+: type(type)
+, name(name)
 , double_attributes()
 , string_attributes()
 , vector_attributes()
