@@ -1,4 +1,5 @@
 add_library(synergia_libFF
+    ff_element_map.cc
     ff_element.cc
     ff_drift.cc
     #ff_sbend.cc
@@ -13,7 +14,6 @@ add_library(synergia_libFF
     #ff_vkicker.cc
     #ff_marker.cc
     #ff_constfoc.cc
-    #ff_element_map.cc
     )
 
 #target_link_libraries(synergia_libFF
