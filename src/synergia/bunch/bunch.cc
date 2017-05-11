@@ -569,21 +569,21 @@ void Bunch::check_pz2_positive()
 #endif
 }
 
-#if 0
-void Bunch::set_arrays(double * RESTRICT &xa, double * RESTRICT &xpa,
-                       double * RESTRICT &ya, double * RESTRICT &ypa,
-                       double * RESTRICT &cdta, double * RESTRICT &dpopa)
+void Bunch::set_arrays(double * &xa, double * &xpa,
+                       double * &ya, double * &ypa,
+                       double * &cdta, double * &dpopa)
 {
-    double *origin = local_particles->origin();
-    int stride = local_particles->shape()[0];
-    xa = origin + stride*Bunch::x;
-    xpa = origin + stride*Bunch::xp;
-    ya = origin + stride*Bunch::y;
-    ypa = origin + stride*Bunch::yp;
-    cdta = origin + stride*Bunch::cdt;
+    double *origin = &local_particles[0];
+    int stride = local_num;
+    xa    = origin + stride*Bunch::x;
+    xpa   = origin + stride*Bunch::xp;
+    ya    = origin + stride*Bunch::y;
+    ypa   = origin + stride*Bunch::yp;
+    cdta  = origin + stride*Bunch::cdt;
     dpopa = origin + stride*Bunch::dpop;
 }
 
+#if 0
 void Bunch::set_alt_arrays(double * RESTRICT &xa, double * RESTRICT &xpa,
                        double * RESTRICT &ya, double * RESTRICT &ypa,
                        double * RESTRICT &cdta, double * RESTRICT &dpopa)

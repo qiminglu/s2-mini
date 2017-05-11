@@ -10,13 +10,13 @@
 
 const double split_element_tolerance = 1.0e-9;
 
-Lattice_element_slice::Lattice_element_slice(Lattice_element const & element) 
+Lattice_element_slice::Lattice_element_slice(Lattice_element & element) 
 : element_ptr(&element)
 , whole(true), left_edge(true), right_edge(true), left(0.0), right(element.get_length())
 {
 }
 
-Lattice_element_slice::Lattice_element_slice(Lattice_element const & element, double left, double right) 
+Lattice_element_slice::Lattice_element_slice(Lattice_element & element, double left, double right) 
 : element_ptr(&element), whole(false), left_edge(false), right_edge(false), left(left), right(right)
 {
     if (left < 0.0) throw std::range_error("Lattice_element_slice: left must be >= 0.0");

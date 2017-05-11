@@ -12,7 +12,7 @@ void LibFF_operation::apply(Bunch & bunch, int verbosity, Logger & logger)
 
     for (auto const & slice : lattice_element_slices)
     {
-        std::string const & type(slice.get_lattice_element().get_type());
+        std::string const & type(slice->get_lattice_element().get_type());
         the_big_giant_global_ff_element_map.get_element_type(type)->apply(*slice, bunch);
     }
 

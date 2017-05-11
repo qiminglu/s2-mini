@@ -12,7 +12,7 @@ class Lattice_element;
 class Lattice_element_slice
 {
 private:
-    Lattice_element const * element_ptr;
+    Lattice_element * element_ptr;
     bool whole;
     bool left_edge;
     bool right_edge;
@@ -20,8 +20,8 @@ private:
     double right;
 
 public:
-    Lattice_element_slice(Lattice_element const & element);
-    Lattice_element_slice(Lattice_element const & element, double left, double right);
+    Lattice_element_slice(Lattice_element & element);
+    Lattice_element_slice(Lattice_element & element, double left, double right);
 
     bool   is_whole()       const { return whole; }
     bool   has_left_edge()  const { return left_edge; }
@@ -30,7 +30,7 @@ public:
     double get_right()      const { return right; }
 
     Lattice_element const & get_lattice_element() const { return *element_ptr; }
-    //Lattice_element       & get_lattice_element()       { return *element_ptr; }
+    Lattice_element       & get_lattice_element()       { return *element_ptr; }
 };
 
 

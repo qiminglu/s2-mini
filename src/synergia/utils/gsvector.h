@@ -2,16 +2,17 @@
 #ifndef GSVECTOR_H_
 #define GSVECTOR_H_
 
-#include <boost/core/enable_if.hpp>
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
-#if 0
+#if 1
 #undef GSV_SSE
 #undef GSV_AVX
 #undef GSV_V4D
 #undef GSV_MIC
 #endif
+
+
 
 
 // helper
@@ -20,9 +21,9 @@ namespace detail
     template <class T, class E = void>
     struct VectorHelper
     { 
-        static const size_t size() { return 1; }
-        static T ld(const double *p) { return *p; } 
-        static T st(double * p, const T & v) { *p = v; }
+        static size_t size() { return 1; }
+        static T    ld(const double *p) { return *p; } 
+        static void st(double * p, const T & v) { *p = v; }
     };
 }
 
@@ -49,7 +50,7 @@ struct Vec : public VecExpr<Vec<T>, T>
 {
     T data;
 
-    static const size_t size() { return detail::VectorHelper<T>::size(); }
+    static size_t size() { return detail::VectorHelper<T>::size(); }
 
     Vec(const double   d) : data( d ) { }
     Vec(const double * p) : data( detail::VectorHelper<T>::ld(p) ) { }
@@ -204,11 +205,12 @@ class vector4double;
   #include <mass_simd.h>
 #endif
 
+#if 0
 namespace detail
 {
     // specialization of helper class
     template <class T>
-    struct VectorHelper<T, typename boost::enable_if<boost::is_same<T, Vec2d > >::type>
+    struct VectorHelper<T, typename std::enable_if<std::is_same<T, Vec2d > >::type>
     { 
         static const size_t size() { return 2; }
         static T ld(const double *p) { T t; t.load_a(p); return t; }
@@ -216,7 +218,7 @@ namespace detail
     };
 
     template <class T>
-    struct VectorHelper<T, typename boost::enable_if<boost::is_same<T, Vec4d > >::type>
+    struct VectorHelper<T, typename std::enable_if<std::is_same<T, Vec4d > >::type>
     { 
         static const size_t size() { return 4; }
         static T ld(const double *p) { T t; t.load_a(p); return t; }
@@ -227,7 +229,7 @@ namespace detail
 
 // operations
 template <typename E1, typename E2, class T>
-struct VecAdd<E1, E2, T, typename boost::enable_if<boost::is_same<T, vector4double> >::type>
+struct VecAdd<E1, E2, T, typename std::enable_if<std::is_same<T, vector4double> >::type>
  : public VecExpr<VecAdd<E1, E2, T>, T>
 {
     E1 const & _u; E2 const & _v;
@@ -236,12 +238,13 @@ struct VecAdd<E1, E2, T, typename boost::enable_if<boost::is_same<T, vector4doub
 };
 
 // stream operator
-template <class T, typename boost::enable_if<boost::is_same<T, double> >::type>
+template <class T, typename std::enable_if<std::is_same<T, double> >::type>
 inline std::ostream & operator << (std::ostream & out, Vec<T> & v)
 {
     out << "(" << v.data << ")";
     return out;
 }
+#endif
 
 
 

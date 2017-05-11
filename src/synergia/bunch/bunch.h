@@ -232,11 +232,9 @@ public:
     void
     check_pz2_positive();
     
-#if 0
-    void set_arrays(double * RESTRICT &xa, double * RESTRICT &xpa,
-                    double * RESTRICT &ya, double * RESTRICT &ypa,
-                    double * RESTRICT &cdta, double * RESTRICT &dpopa);
-#endif
+    void set_arrays(double * &xa, double * &xpa,
+                    double * &ya, double * &ypa,
+                    double * &cdta, double * &dpopa);
 };
 
 
