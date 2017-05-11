@@ -1,0 +1,6 @@
+add_subdirectory(foundation)
+add_subdirectory(bunch)
+add_subdirectory(lattice)
+add_subdirectory(simulation)
+add_subdirectory(collective)
+add_subdirectory(utils)

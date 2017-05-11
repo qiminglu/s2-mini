@@ -1,0 +1,1 @@
+add_library(synergia_lattice lattice_element.cc)
