@@ -36,7 +36,7 @@ set(OpenACC_GCC_GXX_FLAGS "-fopenacc -foffload=nvptx-none ")
 #set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${OpenACC_PGI_CXX_FLAGS}")
 #set(CMAKE_CXX_FLAGS "-std=c++11 -fopenacc -foffload=nvptx-none -foffload=\"-O3\"")
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${OpenMP_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++11 ${OpenMP_PGI_CXX_FLAGS}")
 
 #OpenSSL Libraries
 #find_package(OpenSSL REQUIRED)
