@@ -75,6 +75,7 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
     const int num_blocks = local_num / gsvsize;
     const int block_last = num_blocks * gsvsize;
 
+#if 0
     #pragma omp parallel for
     for (int part = 0; part < block_last; part += gsvsize) 
     {
@@ -91,9 +92,15 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
         y.store(&ya[part]);
         cdt.store(&cdta[part]);
     }
+#endif
 
-    for (int part = block_last; part < local_num; ++part) 
+    //for (int part = block_last; part < local_num; ++part) 
+    #pragma omp parallel for
+    #pragma acc data copy(xa[0:local_num], xpa[0:local_num], ya[0:local_num], ypa[0:local_num], cdta[0:local_num], dpopa[0:local_num])
+    #pragma acc kernels
+    for (int part = 0; part < local_num; ++part) 
     {
+#if 0
         double x(xa[part]);
         double xp(xpa[part]);
         double y(ya[part]);
@@ -106,6 +113,9 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
         xa[part] = x;
         ya[part] = y;
         cdta[part] = cdt;
+#endif
+
+        FF_algorithm::drift_unit(xa[part], xpa[part], ya[part], ypa[part], cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
     }
 
     bunch.get_reference_particle().increment_trajectory(length);

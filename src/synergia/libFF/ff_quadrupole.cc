@@ -1,6 +1,5 @@
 #include "ff_quadrupole.h"
 #include "ff_algorithm.h"
-#include "synergia/lattice/chef_utils.h"
 #include "synergia/utils/gsvector.h"
 #include "synergia/utils/logger.h"
 
@@ -125,9 +124,9 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
     int local_num = bunch.get_local_num();
     MArray2d_ref particles = bunch.get_local_particles();
 
-    double * RESTRICT xa, * RESTRICT xpa;
-    double * RESTRICT ya, * RESTRICT ypa;
-    double * RESTRICT cdta, * RESTRICT dpopa;
+    double * xa, * xpa;
+    double * ya, * ypa;
+    double * cdta, * dpopa;
 
     bunch.set_arrays(xa, xpa, ya, ypa, cdta, dpopa);
 
@@ -137,7 +136,9 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
 
     if (length == 0.0) 
     {
+#if 0
         #pragma omp parallel for
+        #pragma acc kernels
         for (int part = 0; part < block_last; part += gsvsize) 
         {
             GSVector  x( &xa[part]);
@@ -153,8 +154,11 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
             xp.store(&xpa[part]);
             yp.store(&ypa[part]);
         }
+#endif
 
-        for (int part = block_last; part < local_num; ++part) 
+        //for (int part = block_last; part < local_num; ++part) 
+        #pragma acc kernels
+        for (int part = 0; part < local_num; ++part) 
         {
             double  x( xa[part]);
             double xp(xpa[part]);
@@ -183,7 +187,9 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
         double step_length = length/steps;
         double step_strength[2] = { k[0]*step_length, k[1]*step_length };
 
+#if 0
         #pragma omp parallel for
+        #pragma acc kernels
         for (int part = 0; part < block_last; part += gsvsize) 
         {
             GSVector    x(   &xa[part]);
@@ -237,8 +243,15 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
              cdt.store(&cdta[part]);
             dpop.store(&dpopa[part]);
         }
+#endif
 
-        for (int part = block_last; part < local_num; ++part) 
+
+        #pragma acc data copy(xa[0:local_num], xpa[0:local_num], ya[0:local_num], ypa[0:local_num], cdta[0:local_num], dpopa[0:local_num])
+        {
+
+        //for (int part = block_last; part < local_num; ++part) 
+        #pragma acc kernels loop
+        for (int part = 0; part < local_num; ++part) 
         {
             double    x(   xa[part]);
             double   xp(  xpa[part]);
@@ -266,37 +279,11 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
              cdta[part] = cdt;
             dpopa[part] = dpop;
         }
+        }
 
         bunch.get_reference_particle().increment_trajectory(length);
     }
 }
-
-template<class Archive>
-    void
-    FF_quadrupole::serialize(Archive & ar, const unsigned int version)
-    {
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(FF_element);
-    }
-
-template
-void
-FF_quadrupole::serialize<boost::archive::binary_oarchive >(
-        boost::archive::binary_oarchive & ar, const unsigned int version);
-
-template
-void
-FF_quadrupole::serialize<boost::archive::xml_oarchive >(
-        boost::archive::xml_oarchive & ar, const unsigned int version);
-
-template
-void
-FF_quadrupole::serialize<boost::archive::binary_iarchive >(
-        boost::archive::binary_iarchive & ar, const unsigned int version);
-
-template
-void
-FF_quadrupole::serialize<boost::archive::xml_iarchive >(
-        boost::archive::xml_iarchive & ar, const unsigned int version);
 
 FF_quadrupole::~FF_quadrupole()
 {

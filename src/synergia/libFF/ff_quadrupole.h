@@ -14,11 +14,9 @@ public:
     virtual void apply(Lattice_element_slice const& slice, JetParticle & jet_particle);
     virtual void apply(Lattice_element_slice const& slice, Bunch & bunch);
 
-    template<class Archive>
-        void serialize(Archive & ar, const unsigned int version);
     virtual ~FF_quadrupole();
 };
 
-typedef boost::shared_ptr<FF_quadrupole > FF_quadrupole_sptr;
+typedef std::shared_ptr<FF_quadrupole > FF_quadrupole_sptr;
 
 #endif // FF_QUADRUPOLE_H

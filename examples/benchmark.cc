@@ -13,12 +13,12 @@
 // be cleanup up properly before we call MPI_Finalize.
 void run()
 {
-    std::vector<int > grid_shape = { 32, 32, 32 };
+    std::vector<int > grid_shape = { 64, 64, 64 };
 
     const int part_per_cell = 10;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
-    const int seed = 4;
+    //const int seed = 4;
     const double num_real_particles = 1e13;
 
     const int num_steps = 2;
@@ -37,16 +37,37 @@ void run()
     // reference particle
     Reference_particle ref_part(1, pconstants::mp, 7.0);
 
-    // lattice elements
-    Lattice_element e_drift("drift", "d1");
-    e_drift.set_double_attribute("l", 1.0);
-
     // the lattice
     Lattice lattice;
     lattice.set_reference_particle(ref_part);
+
+    // lattice elements
+    Lattice_element e_drift("drift", "d1");
+    e_drift.set_lattice(lattice);
+    e_drift.set_double_attribute("l", 1.0);
+
+    Lattice_element e_quad("quadrupole", "q1");
+    e_quad.set_lattice(lattice);
+    e_quad.set_double_attribute("l", 1.0);
+    e_quad.set_double_attribute("k1", 0.01);
+
+    // append element to the lattice
     lattice.append_element(e_drift);
+    //lattice.append_element(e_quad);
 
     Bunch bunch(ref_part, num_macro_particles, num_real_particles, comm);
+    auto & parts = bunch.get_local_particles();
+
+    for(int i=0; i<num_macro_particles; ++i)
+    {
+        parts[num_macro_particles * 0 + i] = 0.10 + 0.1 * i/num_macro_particles;
+        parts[num_macro_particles * 1 + i] = 0.11 + 0.1 * i/num_macro_particles;
+        parts[num_macro_particles * 2 + i] = 0.12 + 0.1 * i/num_macro_particles;
+        parts[num_macro_particles * 3 + i] = 0.13 + 0.1 * i/num_macro_particles;
+        parts[num_macro_particles * 4 + i] = 0.14 + 0.1 * i/num_macro_particles;
+        parts[num_macro_particles * 5 + i] = 0.15 + 0.1 * i/num_macro_particles;
+    }
+
 
 #if 0
     Random_distribution distribution(seed, *comm_sptr);
@@ -75,8 +96,9 @@ void run()
                     num_steps));
 #endif
 
-    Propagator propagator(stepper);
     Simulator simulator(bunch);
+    Propagator propagator(stepper);
+    propagator.set_num_threads(32);
 
     double t0 = MPI_Wtime();
 

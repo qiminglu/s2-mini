@@ -15,15 +15,28 @@ FIND_PACKAGE(OpenMP)
 if (OPENMP_FOUND)
 
     # hard-wired -mp for PGI compiler
-    set (OpenMP_C_FLAGS "-mp")
-    set (OpenMP_CXX_FLAGS "-mp")
+    set (OpenMP_PGI_C_FLAGS "-mp")
+    set (OpenMP_PGI_CXX_FLAGS "-mp")
 
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (OpenMP_GCC_C_FLAGS "-fopenmp")
+    set (OpenMP_GCC_CXX_FLAGS "-fopenmp")
+
 endif ()
 
+set(OpenACC_PGI_C_FLAGS   "-acc -ta=tesla:cc60,time -Minfo=accel")
+set(OpenACC_PGI_CXX_FLAGS "-acc -ta=tesla:cc60,time -Minfo=accel")
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(OpenACC_GCC_GXX_FLAGS "-fopenacc -foffload=nvptx-none ")
+
+
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+#set(CMAKE_CXX_FLAGS "-std=c++11 -O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} ${OpenACC_PGI_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "-std=c++11 -fopenacc -foffload=nvptx-none -foffload=\"-O3\"")
+
+set(CMAKE_CXX_FLAGS "-std=c++11 ${OpenMP_CXX_FLAGS}")
 
 #OpenSSL Libraries
 #find_package(OpenSSL REQUIRED)

@@ -1,10 +1,13 @@
 #include "ff_drift.h"
+#include "ff_quadrupole.h"
+
 #include "ff_element_map.h"
 #include <memory>
 
 FF_element_map::FF_element_map()
 {
-    element_map["drift"] = std::make_shared<FF_drift>();
+    element_map["drift"]      = std::make_shared<FF_drift>();
+    element_map["quadrupole"] = std::make_shared<FF_quadrupole>();
 }
 
 bool FF_element_map::has_element_type(std::string const& type) const
@@ -34,7 +37,6 @@ FF_element_sptr FF_element_map::get_element_type(std::string const& type) const
 #include "ff_sbend.h"
 #include "ff_rbend.h"
 #include "ff_multipole.h"
-#include "ff_quadrupole.h"
 #include "ff_sextupole.h"
 #include "ff_octupole.h"
 #include "ff_rfcavity.h"

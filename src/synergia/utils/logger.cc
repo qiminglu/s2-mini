@@ -1,5 +1,6 @@
 #include "logger.h"
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 #include "digits.h"
 

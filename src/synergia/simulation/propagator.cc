@@ -92,7 +92,7 @@ void
 Propagator::propagate(State & state)
 {
     // set number of openmp threads
-    omp_set_num_threads(omp_threads);
+    //omp_set_num_threads(omp_threads);
 
     try 
     {
