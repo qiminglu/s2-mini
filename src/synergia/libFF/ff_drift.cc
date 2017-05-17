@@ -2,6 +2,24 @@
 #include "synergia/utils/gsvector.h"
 #include "synergia/utils/logger.h"
 
+
+inline void drift_unit(double *x, double xp, double *y, double yp, double *cdt, double dpop, double length, double ref_p, double mass, double ref_cdt)
+{
+        double dp = dpop + 1.0;
+        double inv_npz = 1.0 / /*sqrt*/(dp * dp - xp * xp - yp * yp);
+        double lxpr = xp * length * inv_npz;
+        double lypr = yp * length * inv_npz;
+        double D2 = lxpr * lxpr + length * length + lypr * lypr;
+        double p = dp * ref_p;
+        double E2 = 1.0;//p * p + mass * mass;
+        double ibeta2 = E2 / (p * p);
+        *x = *x + lxpr;
+        *y = *y + lypr;
+        //cdt += sqrt(D2 / beta2) - reference_cdt;
+        //cdt = cdt + sig * sqrt(D2 * ibeta2) - vrc;
+        //*cdt = *cdt + D2 * ibeta2 - ref_cdt;
+}
+
 FF_drift::FF_drift()
 {
 }
@@ -57,7 +75,7 @@ void FF_drift::apply(Lattice_element_slice const& slice, JetParticle& jet_partic
 
 void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
 {
-    const double  length = slice.get_right() - slice.get_left();
+          double  length = slice.get_right() - slice.get_left();
     const int  local_num = bunch.get_local_num();
     const double    mass = bunch.get_mass();
     const double ref_cdt = get_reference_cdt(length, bunch.get_reference_particle());
@@ -96,11 +114,11 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
 
     //for (int part = block_last; part < local_num; ++part) 
     #pragma omp parallel for
-    #pragma acc data copy(xa[0:local_num], xpa[0:local_num], ya[0:local_num], ypa[0:local_num], cdta[0:local_num], dpopa[0:local_num])
-    #pragma acc kernels
+    #pragma acc data copy(xa[0:local_num], ya[0:local_num], cdta[0:local_num]), copyin(xpa[0:local_num], ypa[0:local_num], dpopa[0:local_num], length, ref_p, mass, ref_cdt)
+    #pragma acc parallel loop
     for (int part = 0; part < local_num; ++part) 
     {
-#if 0
+#if 1
         double x(xa[part]);
         double xp(xpa[part]);
         double y(ya[part]);
@@ -115,7 +133,31 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
         cdta[part] = cdt;
 #endif
 
-        FF_algorithm::drift_unit(xa[part], xpa[part], ya[part], ypa[part], cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
+#if 0
+        double t = (part + 0.5)/local_num;
+        length += 4.0 / (1.0 + t*t);
+#endif
+
+        //FF_algorithm::drift_unit(xa[part], xpa[part], ya[part], ypa[part], cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
+        //FF_algorithm::drift_unit_d(&xa[part], xpa[part], &ya[part], ypa[part], &cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
+
+        //drift_unit(&xa[part], xpa[part], &ya[part], ypa[part], &cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
+#if 0
+        double dp = dpopa[part] + 1.0;
+        double inv_npz = 1.0 / /*sqrt*/(dp * dp - xpa[part] * xpa[part] - ypa[part] * ypa[part]);
+        double lxpr = xpa[part] * length * inv_npz;
+        double lypr = ypa[part] * length * inv_npz;
+        double D2 = lxpr * lxpr + length * length + lypr * lypr;
+        double p = dp * ref_p;
+        double E2 = p * p + mass * mass;
+        //double beta2 = p*p / E2;
+        double ibeta2 = E2 / (p * p);
+        xa[part] = xa[part] + lxpr;
+        ya[part] = ya[part] + lypr;
+        //cdt += sqrt(D2 / beta2) - reference_cdt;
+        //cdt = cdt + sig * sqrt(D2 * ibeta2) - vrc;
+        cdta[part] = cdta[part] + D2 * ibeta2 - ref_cdt;
+#endif
     }
 
     bunch.get_reference_particle().increment_trajectory(length);

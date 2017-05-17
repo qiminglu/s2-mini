@@ -15,7 +15,7 @@ void run()
 {
     std::vector<int > grid_shape = { 64, 64, 64 };
 
-    const int part_per_cell = 10;
+    const int part_per_cell = 100;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
     //const int seed = 4;

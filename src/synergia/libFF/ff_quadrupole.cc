@@ -263,11 +263,13 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
             x -= xoff;
             y -= yoff;
 
+#if 0
             FF_algorithm::yoshida6<double, FF_algorithm::thin_quadrupole_unit<double>, 1 >
                     ( x, xp, y, yp, cdt, dpop,
                       reference_momentum, m,
                       step_reference_cdt,
                       step_length, step_strength, steps );
+#endif
 
             x += xoff;
             y += yoff;

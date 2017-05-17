@@ -7,9 +7,18 @@
 #include "synergia/foundation/PhysicsConstants.h"
 #include "synergia/utils/invsqrt.h"
 
-class FF_algorithm
+namespace FF_algorithm
 {
-public:
+
+    inline static double factorial(int n)
+    {
+        if (n == 0) return 1.0;
+
+        double r = 1; 
+        for(int i = 1; i <= n; ++i) r *= i;
+        return r;
+    }
+
 
     // exact solution for drift spaces
     template <typename T>
@@ -25,19 +34,45 @@ public:
         T vrm(reference_momentum);
         T vrc(reference_cdt);
 
-        T dp = dpop + uni;
-        T inv_npz = uni / sqrt(dp * dp - xp * xp - yp * yp);
+        T dp = dpop + 1.0;
+        T inv_npz = uni / /*sqrt*/(dp * dp - xp * xp - yp * yp);
         T lxpr = xp * vl * inv_npz;
         T lypr = yp * vl * inv_npz;
         T D2 = lxpr * lxpr + vl * vl + lypr * lypr;
-        T p = dp * vrm;
-        T E2 = p * p + vm * vm;
+        T p = dp * reference_momentum;
+        //T E2 = p * p + vm * vm;
+        T E2 = dpop;
         //T beta2 = p*p / E2;
-        T ibeta2 = E2 / (p * p);
+        T ibeta2 = E2 /*/ (p * p)*/;
         x = x + lxpr;
         y = y + lypr;
         //cdt += sqrt(D2 / beta2) - reference_cdt;
-        cdt = cdt + sig * sqrt(D2 * ibeta2) - vrc;
+        //cdt = cdt + sig * sqrt(D2 * ibeta2) - vrc;
+        //cdt = cdt + D2 * ibeta2 - vrc;
+    }
+
+    // exact solution for drift spaces
+    inline void drift_unit_d
+      (double * x, double xp, double * y, double yp, double * cdt, double dpop,
+       double length, double ref_p, double m, double ref_cdt) 
+    {
+        //T sig((0.0<length) - (length<0.0));
+
+        double dp = dpop + 1.0;
+        double inv_npz = 1.0 / /*sqrt*/(dp * dp - xp * xp - yp * yp);
+        double lxpr = xp * length * inv_npz;
+        double lypr = yp * length * inv_npz;
+        double D2 = lxpr * lxpr + length * length + lypr * lypr;
+        double p = dp * ref_p;
+        //T E2 = p * p + vm * vm;
+        double E2 = p;
+        //T beta2 = p*p / E2;
+        double ibeta2 = E2 /*/ (p * p)*/;
+        *x = *x + lxpr;
+        *y = *y + lypr;
+        //cdt += sqrt(D2 / beta2) - reference_cdt;
+        //cdt = cdt + sig * sqrt(D2 * ibeta2) - vrc;
+        //*cdt = *cdt + D2 * p - ref_cdt;
     }
 
     template <typename T>
@@ -589,15 +624,6 @@ public:
         }
     }
 
-    inline static double factorial(int n)
-    {
-        if (n == 0) return 1.0;
-
-        double r = 1; 
-        for(int i = 1; i <= n; ++i) r *= i;
-        return r;
-    }
-
 
 
     // utility
@@ -1013,7 +1039,7 @@ public:
 
 
 
-};
+}
 
 
 
