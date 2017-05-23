@@ -38,8 +38,8 @@ set(OpenACC_GCC_GXX_FLAGS "-fopenacc -foffload=nvptx-none ")
 #set(CMAKE_CXX_FLAGS "-std=c++11 -fopenacc -foffload=nvptx-none -foffload=\"-O3\" -O3")
 #set(CMAKE_CXX_FLAGS "-std=c++11 -fopenmp -O3")
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -acc -ta=tesla:cc60,time -Minfo=accel -O3")
-#set(CMAKE_CXX_FLAGS "-std=c++11 -mp -O3")
+#set(CMAKE_CXX_FLAGS "-std=c++11 -acc -ta=tesla:cc60,time -Minfo=accel -O3")
+set(CMAKE_CXX_FLAGS "-std=c++11 -mp -O3")
 
 #OpenSSL Libraries
 #find_package(OpenSSL REQUIRED)

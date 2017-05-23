@@ -1,5 +1,7 @@
 #include <iostream>
 #include <stdexcept>
+#include <thread>
+#include <chrono>
 
 #include "synergia/lattice/lattice.h"
 #include "synergia/simulation/operator.h"
@@ -15,7 +17,7 @@ void run()
 {
     std::vector<int > grid_shape = { 64, 64, 64 };
 
-    const int part_per_cell = 100;
+    const int part_per_cell = 1000;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
     //const int seed = 4;
@@ -53,21 +55,27 @@ void run()
 
     // append element to the lattice
     lattice.append_element(e_drift);
-    //lattice.append_element(e_quad);
+    lattice.append_element(e_quad);
 
     Bunch bunch(ref_part, num_macro_particles, num_real_particles, comm);
-    auto & parts = bunch.get_local_particles();
+    double * parts = bunch.get_local_particles().origin();
+    int npart = bunch.get_local_num();
 
-    for(int i=0; i<num_macro_particles; ++i)
+    for(int i=0; i<npart; ++i)
     {
-        parts[num_macro_particles * 0 + i] = 0.10 + 0.1 * i/num_macro_particles;
-        parts[num_macro_particles * 1 + i] = 0.11 + 0.1 * i/num_macro_particles;
-        parts[num_macro_particles * 2 + i] = 0.12 + 0.1 * i/num_macro_particles;
-        parts[num_macro_particles * 3 + i] = 0.13 + 0.1 * i/num_macro_particles;
-        parts[num_macro_particles * 4 + i] = 0.14 + 0.1 * i/num_macro_particles;
-        parts[num_macro_particles * 5 + i] = 0.15 + 0.1 * i/num_macro_particles;
+        parts[npart* 0 + i] = 0.10 + 0.1 * i/num_macro_particles;
+        parts[npart* 1 + i] = 0.11 + 0.1 * i/num_macro_particles;
+        parts[npart* 2 + i] = 0.12 + 0.1 * i/num_macro_particles;
+        parts[npart* 3 + i] = 0.13 + 0.1 * i/num_macro_particles;
+        parts[npart* 4 + i] = 0.14 + 0.1 * i/num_macro_particles;
+        parts[npart* 5 + i] = 0.15 + 0.1 * i/num_macro_particles;
     }
 
+    for (int i=0; i<7; ++i) std::cout << parts[i*npart + 0] << "\t";
+    std::cout << "\n";
+
+    bunch.get_local_particles().copy_host_to_dev();
+    //std::this_thread::sleep_for(std::chrono::seconds(5));
 
 #if 0
     Random_distribution distribution(seed, *comm_sptr);
@@ -107,6 +115,11 @@ void run()
 
     double t1 = MPI_Wtime();
     std::cout << "propagate time = " << (t1 - t0) << std::endl;
+
+    bunch.get_local_particles().copy_dev_to_host();
+
+    for (int i=0; i<7; ++i) std::cout << parts[i*num_macro_particles + 0] << "\t";
+    std::cout << "\n";
 }
 
 int

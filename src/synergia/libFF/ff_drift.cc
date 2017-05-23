@@ -89,6 +89,8 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
 
     bunch.set_arrays(xa, xpa, ya, ypa, cdta, dpopa);
 
+    double * __restrict parts = bunch.get_local_particles().origin();
+
     const int gsvsize = GSVector::size();
     const int num_blocks = local_num / gsvsize;
     const int block_last = num_blocks * gsvsize;
@@ -114,11 +116,11 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
 
     //for (int part = block_last; part < local_num; ++part) 
     #pragma omp parallel for
-    #pragma acc data copy(xa[0:local_num], ya[0:local_num], cdta[0:local_num]), copyin(xpa[0:local_num], ypa[0:local_num], dpopa[0:local_num], length, ref_p, mass, ref_cdt)
-    #pragma acc parallel loop
+    //#pragma acc data copy(xa[0:local_num], ya[0:local_num], cdta[0:local_num]), copyin(xpa[0:local_num], ypa[0:local_num], dpopa[0:local_num], length, ref_p, mass, ref_cdt)
+    #pragma acc parallel loop present(parts)
     for (int part = 0; part < local_num; ++part) 
     {
-#if 1
+#if 0
         double x(xa[part]);
         double xp(xpa[part]);
         double y(ya[part]);
@@ -133,10 +135,14 @@ void FF_drift::apply(Lattice_element_slice const& slice, Bunch& bunch)
         cdta[part] = cdt;
 #endif
 
-#if 0
-        double t = (part + 0.5)/local_num;
-        length += 4.0 / (1.0 + t*t);
-#endif
+        FF_algorithm::drift_unit(
+                parts[local_num*0 + part], 
+                parts[local_num*1 + part], 
+                parts[local_num*2 + part], 
+                parts[local_num*3 + part], 
+                parts[local_num*4 + part], 
+                parts[local_num*5 + part], 
+                length, ref_p, mass, ref_cdt );
 
         //FF_algorithm::drift_unit(xa[part], xpa[part], ya[part], ypa[part], cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);
         //FF_algorithm::drift_unit_d(&xa[part], xpa[part], &ya[part], ypa[part], &cdta[part], dpopa[part], length, ref_p, mass, ref_cdt);

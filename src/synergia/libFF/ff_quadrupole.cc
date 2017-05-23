@@ -156,6 +156,7 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
         }
 #endif
 
+#if 0
         //for (int part = block_last; part < local_num; ++part) 
         #pragma acc kernels
         for (int part = 0; part < local_num; ++part) 
@@ -173,6 +174,7 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
             xpa[part] = xp;
             ypa[part] = yp;
         }
+#endif
     } 
     else 
     {
@@ -246,13 +248,14 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
 #endif
 
 
-        #pragma acc data copy(xa[0:local_num], xpa[0:local_num], ya[0:local_num], ypa[0:local_num], cdta[0:local_num], dpopa[0:local_num])
-        {
+        double * __restrict parts = bunch.get_local_particles().origin();
 
+        #pragma omp parallel for
         //for (int part = block_last; part < local_num; ++part) 
-        #pragma acc kernels loop
+        #pragma acc kernels loop present(parts)
         for (int part = 0; part < local_num; ++part) 
         {
+#if 0
             double    x(   xa[part]);
             double   xp(  xpa[part]);
             double    y(   ya[part]);
@@ -263,13 +266,11 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
             x -= xoff;
             y -= yoff;
 
-#if 0
             FF_algorithm::yoshida6<double, FF_algorithm::thin_quadrupole_unit<double>, 1 >
                     ( x, xp, y, yp, cdt, dpop,
                       reference_momentum, m,
                       step_reference_cdt,
                       step_length, step_strength, steps );
-#endif
 
             x += xoff;
             y += yoff;
@@ -280,7 +281,20 @@ void FF_quadrupole::apply(Lattice_element_slice const& slice, Bunch& bunch)
               ypa[part] = yp;
              cdta[part] = cdt;
             dpopa[part] = dpop;
-        }
+#endif
+
+
+            FF_algorithm::yoshida6<double, FF_algorithm::thin_quadrupole_unit<double>, 1 >
+                    ( parts[local_num * 0 + part], 
+                      parts[local_num * 1 + part], 
+                      parts[local_num * 2 + part], 
+                      parts[local_num * 3 + part], 
+                      parts[local_num * 4 + part], 
+                      parts[local_num * 5 + part], 
+                      reference_momentum, m,
+                      step_reference_cdt,
+                      step_length, step_strength, steps );
+
         }
 
         bunch.get_reference_particle().increment_trajectory(length);

@@ -5,14 +5,75 @@
 #include <vector>
 
 
+// Synergia Vector (svec)
+template<typename T>
+class svec
+{
+public:
+
+    svec()
+      : data(new T[0]), size(0)
+    {
+        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+    }
+
+    svec(size_t size_)
+      : data(new T[size_]), size(size_)
+    {
+        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+    }
+
+    ~svec()
+    {
+        #pragma acc exit data delete(data[0:size], this[0:1])
+        delete [] data;
+    }
+
+    void resize(size_t size_)
+    {
+        delete [] data;
+        data = new T[size_];
+        size = size_;
+
+        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+    }
+
+    void copy_host_to_dev()
+    {
+        #pragma acc update device(data[0:size])
+    }
+
+    void copy_dev_to_host()
+    {
+        #pragma acc update self(data[0:size])
+    }
+
+    inline T & operator[] (size_t i) const
+    { return data[i]; }
+
+    inline T * origin() const
+    { return data; }
+
+private:
+
+    T    * data;
+    size_t size;
+};
+
+
 typedef std::vector<double>         MArray1d;
 typedef std::vector<double> &       MArray1d_ref;
 typedef std::vector<double> const & Const_MArray1d_ref;
 
+#if 0
 typedef std::vector<double>         MArray2d;
 typedef std::vector<double> &       MArray2d_ref;
 typedef std::vector<double> const & Const_MArray2d_ref;
+#endif
 
+typedef svec<double>                MArray2d;
+typedef svec<double> &              MArray2d_ref;
+typedef svec<double> const &        Const_MArray2d_ref;
 
 
 #if 0
