@@ -12,52 +12,55 @@ class svec
 public:
 
     svec()
-      : data(new T[0]), size(0)
+      : data_(new T[0]), size_(0)
     {
-        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+        #pragma acc enter data copyin(this[0:1]) create(data_[0:size_])
     }
 
-    svec(size_t size_)
-      : data(new T[size_]), size(size_)
+    svec(size_t sz)
+      : data_(new T[sz]), size_(sz)
     {
-        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+        #pragma acc enter data copyin(this[0:1]) create(data_[0:size_])
     }
 
     ~svec()
     {
-        #pragma acc exit data delete(data[0:size], this[0:1])
-        delete [] data;
+        #pragma acc exit data delete(data_[0:size_], this[0:1])
+        delete [] data_;
     }
 
-    void resize(size_t size_)
+    void resize(size_t sz)
     {
-        delete [] data;
-        data = new T[size_];
-        size = size_;
+        delete [] data_;
+        data_ = new T[sz];
+        size_ = sz;
 
-        #pragma acc enter data copyin(this[0:1]) create(data[0:size])
+        #pragma acc enter data copyin(this[0:1]) create(data_[0:size_])
     }
 
     void copy_host_to_dev()
     {
-        #pragma acc update device(data[0:size])
+        #pragma acc update device(data_[0:size_])
     }
 
     void copy_dev_to_host()
     {
-        #pragma acc update self(data[0:size])
+        #pragma acc update self(data_[0:size_])
     }
 
     inline T & operator[] (size_t i) const
-    { return data[i]; }
+    { return data_[i]; }
 
     inline T * origin() const
-    { return data; }
+    { return data_; }
+
+    size_t size() const
+    { return size_; }
 
 private:
 
-    T    * data;
-    size_t size;
+    T    * data_;
+    size_t size_;
 };
 
 

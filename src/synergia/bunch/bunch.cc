@@ -130,20 +130,14 @@ Bunch::construct(int particle_charge, int total_num, double real_num)
         decompose_1d(*comm_sptr, total_num, offsets, counts);
         local_num = counts[comm_sptr->get_rank()];
 
-        if (local_num != total_num)
-        {
-            local_particles.resize( local_num * 7 );
-            std::cout << "resize local particles\n";
-        }
+        local_particles.resize(local_num * 7);
 
         #pragma omp parallel for
         for (int i=0; i<local_num; ++i)
         {
             for(int j=0; j<7; ++j)
             {
-#if 0
-                (*local_particles)[i][j] = 0.0;
-#endif
+                local_particles[j * local_num + i] = 0.0;
             }
         }
 
@@ -159,7 +153,7 @@ Bunch::Bunch(Reference_particle const& reference_particle, int total_num, double
 : z_period_length(0.0)
 , z_periodic(0)
 , reference_particle(reference_particle)
-, local_particles(total_num * 7)
+, local_particles()
 , local_num(total_num)
 , real_num(real_num)
 , bucket_index(0)
