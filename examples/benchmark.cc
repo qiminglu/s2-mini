@@ -15,19 +15,19 @@
 // be cleanup up properly before we call MPI_Finalize.
 void run()
 {
-    std::vector<int > grid_shape = { 64, 64, 64 };
+    std::vector<int > grid_shape = { 64, 64, 256 };
 
-    const int part_per_cell = 10;
+    const int part_per_cell = 200;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
     //const int seed = 4;
     const double num_real_particles = 1e13;
 
     const int num_steps = 2;
-    const int num_turns = 4;
+    const int num_turns = 2;
     const int map_order = 2;
 
-    int verbosity = 2;
+    int verbosity = 6;
 
 #if 0
     Lattice_sptr lattice_sptr(new Lattice());
@@ -55,7 +55,7 @@ void run()
 
     // append element to the lattice
     lattice.append_element(e_drift);
-    lattice.append_element(e_quad);
+    //lattice.append_element(e_quad);
 
     Bunch bunch(ref_part, num_macro_particles, num_real_particles, comm);
     double * parts = bunch.get_local_particles().origin();
@@ -93,7 +93,7 @@ void run()
     Space_charge_3d_open_hockney_sptr space_charge_sptr(new Space_charge_3d_open_hockney(grid_shape));
 #endif
 
-    auto space_charge = std::make_shared<Space_charge_mini>("dummy");
+    auto space_charge = std::make_shared<Space_charge_mini>(grid_shape);
     Stepper stepper(lattice, map_order, space_charge, num_steps);
 
 #if 0
