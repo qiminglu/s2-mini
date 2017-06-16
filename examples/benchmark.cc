@@ -8,8 +8,8 @@
 #include "synergia/simulation/lattice_simulator.h"
 #include "synergia/simulation/propagator.h"
 #include "synergia/bunch/bunch.h"
+#include "synergia/collective/space_charge_mini.h"
 #include "synergia/foundation/physical_constants.h"
-
 
 // We put the actual code in a separate function so that shared_ptr's can
 // be cleanup up properly before we call MPI_Finalize.
@@ -17,7 +17,7 @@ void run()
 {
     std::vector<int > grid_shape = { 64, 64, 64 };
 
-    const int part_per_cell = 1000;
+    const int part_per_cell = 10;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
     //const int seed = 4;
@@ -93,8 +93,7 @@ void run()
     Space_charge_3d_open_hockney_sptr space_charge_sptr(new Space_charge_3d_open_hockney(grid_shape));
 #endif
 
-    //Space_charge_3d_open_hockney space_charge();
-    Dummy_collective_operator space_charge("dummy");
+    auto space_charge = std::make_shared<Space_charge_mini>("dummy");
     Stepper stepper(lattice, map_order, space_charge, num_steps);
 
 #if 0

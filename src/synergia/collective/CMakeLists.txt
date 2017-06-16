@@ -1,0 +1,1 @@
+add_library(synergia_collective space_charge_mini.cc)

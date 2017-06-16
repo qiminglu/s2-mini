@@ -9,7 +9,7 @@ const std::string Stepper::force_diagnostics_attribute("force_diagnostics");
 const double Stepper::fixed_step_tolerance = 1.0e-8;
 #endif
 
-Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator & col_op, int steps_per_element) 
+Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator_sptr col_op, int steps_per_element) 
 : lattice_simulator(lattice, map_order)
 , steps()
 {
@@ -61,7 +61,7 @@ Stepper::Stepper(Lattice & lattice, int map_order, Collective_operator & col_op,
                 ind_op_ptr->append_slice(slice_1st_half);
 
                 //Collective Effects
-                //step.append(col_op, 1.0);
+                step.append(col_op, 1.0);
 #if 0
                 for (Collective_operators::const_iterator coll_op_it =
                         collective_operators.begin(); coll_op_it

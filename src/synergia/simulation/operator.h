@@ -43,6 +43,8 @@ public:
     virtual void apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger) { }
 };
 
+typedef std::shared_ptr<Collective_operator> Collective_operator_sptr;
+
 // Dummy collective operator
 //
 class Dummy_collective_operator : public Collective_operator
@@ -50,7 +52,7 @@ class Dummy_collective_operator : public Collective_operator
 public:
     Dummy_collective_operator(std::string const& name) : Collective_operator(name) { }
     virtual ~Dummy_collective_operator() { }
-    virtual void apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger) { }
+    virtual void apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger) { logger<<"dummy apply\n"; }
 };
 
 

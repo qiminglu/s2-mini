@@ -31,7 +31,7 @@ protected:
 public:
     Stepper(Lattice & lattice, 
             int map_order, 
-            Collective_operator & col_op, 
+            Collective_operator_sptr col_op, 
             int steps_per_element);
 
     Lattice_simulator & get_lattice_simulator()
