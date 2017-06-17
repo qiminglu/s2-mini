@@ -17,6 +17,7 @@ public:
 private:
 
     void get_charge_density(Bunch & bunch, Logger & logger);
+    void get_charge_density_reduce(Bunch & bunch, Logger & logger);
 
     std::vector<int> shape;
     svec<double> rho;

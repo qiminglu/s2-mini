@@ -26,8 +26,8 @@ Space_charge_mini::Space_charge_mini(std::vector<int> const & grid_shape)
 
 void Space_charge_mini::apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger)
 {
-    get_charge_density(bunch, logger);
-    //logger << rho[0] << ", " << rho[1] << "\n";
+    get_charge_density_reduce(bunch, logger);
+    logger << rho[0] << ", " << rho[1] << "\n";
 }
 
 void Space_charge_mini::get_charge_density(Bunch & bunch, Logger & logger)
@@ -181,4 +181,74 @@ void Space_charge_mini::get_charge_density(Bunch & bunch, Logger & logger)
     } //  end of #pragma parallel
 
     //memcpy( prho, rs, sizeof(double)*nc );
+}
+void Space_charge_mini::get_charge_density_reduce(Bunch & bunch, Logger & logger)
+{
+    const int npart = bunch.get_local_num();
+    svec<double> const & parts = bunch.get_local_particles();
+
+    double * prho = rho.origin();
+
+    std::vector<double> offs = { 0, 0, 0 };
+    std::vector<double> size = { 2, 2, 2 };
+    std::vector<double> h = { size[0]/shape[0], size[1]/shape[1], size[2]/shape[2] };
+
+    double w0 = 1e4 * bunch.get_particle_charge() * 1.602176565e-19 / (h[0]*h[1]*h[2]);
+
+    int gx = shape[0];
+    int gy = shape[1];
+    int gz = shape[2];
+
+    int nc = gx * gy * gz;
+
+    //logger << "nt = " << nt << "\n";
+
+    double lx = offs[0] - size[0] / 2.0;
+    double ly = offs[1] - size[1] / 2.0;
+    double lz = offs[2] - size[2] / 2.0;
+
+    double cx = h[0];
+    double cy = h[1];
+    double cz = h[2];
+
+    //#pragma omp parallel for reduction(+:prho[:10])
+    #pragma omp parallel for shared(parts, gx, gy, gz, lx, ly, lz, cx, cy, cz) reduction(+:prho[:nc])
+    for (int i=0; i<npart; ++i)
+    {
+        int ix, iy, iz;
+        double ox, oy, oz;
+
+        double x = parts[0 * npart +i];
+        double y = parts[2 * npart +i];
+        double z = parts[4 * npart +i];
+
+        double scaled_location;
+
+        scaled_location = (x - lx) / cx - 0.5;
+        ix = fast_int_floor(scaled_location);
+        ox = scaled_location - ix;
+
+        scaled_location = (y - ly) / cy - 0.5;
+        iy = fast_int_floor(scaled_location);
+        oy = scaled_location - iy;
+
+        scaled_location = (z - lz) / cz - 0.5;
+        iz = fast_int_floor(scaled_location);
+        oz = scaled_location - iz;
+
+        int base = iz * gx * gy;
+
+        if( ingrid(ix  , iy  , iz, gx, gy, gz) ) prho[base + (iy  )*gx + ix  ] += w0*(1-ox)*(1-oy)*(1-oz);
+        if( ingrid(ix+1, iy  , iz, gx, gy, gz) ) prho[base + (iy  )*gx + ix+1] += w0*(  ox)*(1-oy)*(1-oz);
+        if( ingrid(ix  , iy+1, iz, gx, gy, gz) ) prho[base + (iy+1)*gx + ix  ] += w0*(1-ox)*(  oy)*(1-oz);
+        if( ingrid(ix+1, iy+1, iz, gx, gy, gz) ) prho[base + (iy+1)*gx + ix+1] += w0*(  ox)*(  oy)*(1-oz);
+
+        base = (iz+1) * gx * gy;
+
+        if( ingrid(ix  , iy  , iz+1, gx, gy, gz) ) prho[base + (iy  )*gx + ix  ] += w0*(1-ox)*(1-oy)*(oz);
+        if( ingrid(ix+1, iy  , iz+1, gx, gy, gz) ) prho[base + (iy  )*gx + ix+1] += w0*(  ox)*(1-oy)*(oz);
+        if( ingrid(ix  , iy+1, iz+1, gx, gy, gz) ) prho[base + (iy+1)*gx + ix  ] += w0*(1-ox)*(  oy)*(oz); 
+        if( ingrid(ix+1, iy+1, iz+1, gx, gy, gz) ) prho[base + (iy+1)*gx + ix+1] += w0*(  ox)*(  oy)*(oz); 
+
+    }
 }
