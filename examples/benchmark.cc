@@ -15,7 +15,15 @@
 // be cleanup up properly before we call MPI_Finalize.
 void run(int ppc)
 {
-    std::vector<int > grid_shape = { 64, 64, 256 };
+    std::vector<int> grid_shape = { 64, 64, 256 };
+
+    int gx = grid_shape[0];
+    int gy = grid_shape[1];
+    int gz = grid_shape[2];
+
+    double cx = 2.0 / gx;
+    double cy = 2.0 / gy;
+    double cz = 2.0 / gz;
 
     const int part_per_cell = ppc;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
@@ -61,14 +69,29 @@ void run(int ppc)
     double * parts = bunch.get_local_particles().origin();
     int npart = bunch.get_local_num();
 
+    int pc = ppc * 1.2;
+
     for(int i=0; i<npart; ++i)
     {
+#if 0
         parts[npart* 0 + i] = 0.10 + 0.1 * i/num_macro_particles;
         parts[npart* 1 + i] = 0.11 + 0.1 * i/num_macro_particles;
         parts[npart* 2 + i] = 0.12 + 0.1 * i/num_macro_particles;
         parts[npart* 3 + i] = 0.13 + 0.1 * i/num_macro_particles;
         parts[npart* 4 + i] = 0.14 + 0.1 * i/num_macro_particles;
         parts[npart* 5 + i] = 0.15 + 0.1 * i/num_macro_particles;
+#endif
+        int idx = i / pc;
+        int iz = idx / (gx * gy);
+        int iy = ( idx - iz * (gx*gy) ) / gx;
+        int ix = idx - iz*(gx*gy) - iy*gx;
+
+        parts[npart* 0 + i] = -0.99 + cx * ix;
+        parts[npart* 1 + i] =  0.0;
+        parts[npart* 2 + i] = -0.99 + cy * iy;
+        parts[npart* 3 + i] =  0.0;
+        parts[npart* 4 + i] = -0.99 + cz * iz;
+        parts[npart* 5 + i] =  0.0;
     }
 
     for (int i=0; i<7; ++i) std::cout << parts[i*npart + 0] << "\t";
