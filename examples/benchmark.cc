@@ -13,11 +13,11 @@
 
 // We put the actual code in a separate function so that shared_ptr's can
 // be cleanup up properly before we call MPI_Finalize.
-void run()
+void run(int ppc)
 {
     std::vector<int > grid_shape = { 64, 64, 256 };
 
-    const int part_per_cell = 200;
+    const int part_per_cell = ppc;
     const int num_macro_particles = grid_shape[0] * grid_shape[1] * grid_shape[2] * part_per_cell;
 
     //const int seed = 4;
@@ -126,7 +126,14 @@ main(int argc, char **argv)
 {
     MPI_Init(&argc, &argv);
 
-    run();
+    int part_per_cell = 10;
+
+    if (argc == 2)
+    {
+        part_per_cell = std::stoi(argv[1], nullptr, 0);
+    }
+
+    run(part_per_cell);
 
     MPI_Finalize();
     return 0;
