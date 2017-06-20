@@ -171,7 +171,7 @@ Independent_operator::apply(Bunch & bunch, double time_step, Step & step, int ve
         if (verbosity > 3)
             logger << "Independent_operator: operation type = " << opn->get_type() << std::endl;
 
-        opn->apply(bunch, verbosity, logger);
+        //opn->apply(bunch, verbosity, logger);
 
         std::string label("independent_operator_apply-" + opn->get_type() + "_operation_apply");
         t = simple_timer_show(t, label.c_str());
