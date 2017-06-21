@@ -15,7 +15,7 @@
 // be cleanup up properly before we call MPI_Finalize.
 void run(int ppc)
 {
-    std::vector<int> grid_shape = { 64, 64, 256 };
+    std::vector<int> grid_shape = { 32, 32, 256 };
 
     int gx = grid_shape[0];
     int gy = grid_shape[1];

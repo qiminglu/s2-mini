@@ -26,9 +26,9 @@ Space_charge_mini::Space_charge_mini(std::vector<int> const & grid_shape)
 
 void Space_charge_mini::apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger)
 {
-    //get_charge_density_reduce(bunch, logger);
+    //get_charge_density(bunch, logger);
+    get_charge_density_reduce(bunch, logger);
     //get_charge_density_interleaved(bunch, logger);
-    get_charge_density(bunch, logger);
     logger << rho[0] << ", " << rho[1] << "\n";
 }
 
@@ -226,7 +226,6 @@ void Space_charge_mini::get_charge_density_reduce(Bunch & bunch, Logger & logger
         if( ingrid(ix+1, iy  , iz+1, gx, gy, gz) ) prho[base + (iy  )*gx + ix+1] += w0*(  ox)*(1-oy)*(oz);
         if( ingrid(ix  , iy+1, iz+1, gx, gy, gz) ) prho[base + (iy+1)*gx + ix  ] += w0*(1-ox)*(  oy)*(oz); 
         if( ingrid(ix+1, iy+1, iz+1, gx, gy, gz) ) prho[base + (iy+1)*gx + ix+1] += w0*(  ox)*(  oy)*(oz); 
-
     }
 }
 
