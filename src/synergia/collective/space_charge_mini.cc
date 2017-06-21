@@ -27,6 +27,7 @@ Space_charge_mini::Space_charge_mini(std::vector<int> const & grid_shape)
 void Space_charge_mini::apply(Bunch & bunch, double time_step, Step & step, int verbosity, Logger & logger)
 {
     //get_charge_density_reduce(bunch, logger);
+    //get_charge_density_interleaved(bunch, logger);
     get_charge_density(bunch, logger);
     logger << rho[0] << ", " << rho[1] << "\n";
 }
@@ -61,7 +62,7 @@ void Space_charge_mini::get_charge_density(Bunch & bunch, Logger & logger)
         { nt = omp_get_num_threads(); }
 
         rl = new double[nt * nc];
-        rs = new double[nc];
+        //rs = new double[nc];
     }
 
     //logger << "nt = " << nt << "\n";
@@ -146,7 +147,7 @@ void Space_charge_mini::get_charge_density(Bunch & bunch, Logger & logger)
                 for(int x=0; x<gx; ++x)
                 {
                     w = 0.0;
-                    for(int n=0; n<nt; ++n) w += rl[(z*gx*gy + y*gx + x)*nt+n];
+                    for(int n=0; n<nt; ++n) w += rl[n*nt + (z*gx*gy + y*gx + x)];
                     prho[z*gx*gy + y*gx +x] = w;
                 }
             }
@@ -354,7 +355,7 @@ void Space_charge_mini::get_charge_density_interleaved(Bunch & bunch, Logger & l
 
         // deposit to cells
         #pragma omp parallel \
-            shared( rho, pi, po, pc, count, pll  ) \
+            shared( prho, pi, po, pc, count, pll  ) \
             private(x, y, z, ox, oy, oz, n, i, c_idx, w, ws0, ws1, tid, nthreads, seg) 
         {
           tid = omp_get_thread_num();
