@@ -1,4 +1,4 @@
 # s2-mini
 Synergia mini version
 
-* [Build notes](docs/build_notes.md)
+* [Build notes](doc/build_notes.md)
